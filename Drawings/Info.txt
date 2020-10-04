@@ -1,0 +1,20 @@
+Uitleg optische niveau vloeistof sensor
+https://www.electroschematics.com/optical-liquid-level-sensor/
+
+Optische niveau vloeistof sensor
+https://nl.aliexpress.com/item/32955443010.html
+
+Druksensor:
+https://www.amazon.com/Yosoo-Pressure-Transducer-Sensor-Diesel/dp/B01IR2MANC
+
+DS18B20 temperatuursensor:
+https://nl.banggood.com/DS18B20-Waterproof-Digital-Temperature-Temp-Sensor-Probe-1M-2M-3M-5M-10M-15M-p-1211828.html?ID=45764&cur_warehouse=CN
+
+https://www.adafruit.com/product/381
+
+Oled displays:
+https://randomnerdtutorials.com/guide-for-oled-display-with-arduino/
+
+https://www.adafruit.com/product/931
+
+https://www.instructables.com/id/Monochrome-096-i2c-OLED-display-with-arduino-SSD13/

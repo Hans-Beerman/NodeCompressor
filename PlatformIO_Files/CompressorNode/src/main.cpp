@@ -96,9 +96,9 @@ OptoDebounce opto1(OPTO1); // wired to N0 - L1 of 3 phase compressor motor, to d
 #define TEMP_REPORT_WARNING2 ("temperature_sensor_2_(motor)_warning") // label used in reporting for temp. sensor 2
 #define TEMP_REPORT2 ("temperature_sensor_2_(motor)") // label used in reporting for temp. sensor 2
 // Temperature warning and error levels
-#define TEMP_IS_HIGH_LEVEL_1 (60.0) // in degrees Celcius, used for temperature is high warning of sensor 1
+#define TEMP_IS_HIGH_LEVEL_1 (75.0) // in degrees Celcius, used for temperature is high warning of sensor 1
 #define TEMP_IS_TOO_HIGH_LEVEL_1 (90.0) // in degrees Celcius, used to disable the compressor when temperature is too high of sensor 1
-#define TEMP_IS_HIGH_LEVEL_2 (60.0) // in degrees Celcius, used for temperature is high warning of sensor 2
+#define TEMP_IS_HIGH_LEVEL_2 (70.0) // in degrees Celcius, used for temperature is high warning of sensor 2
 #define TEMP_IS_TOO_HIGH_LEVEL_2 (90.0) // in degrees Celcius, used to disable the compressor when temperature is too high of sensor 2
 
 

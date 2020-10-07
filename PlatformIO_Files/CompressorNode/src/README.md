@@ -1,6 +1,6 @@
 **Source code CompressorNode Makerspace Leiden**
 
-Current version: V0.15 Concept
+Current version: V0.16 Concept
 
 This repository contains the source code for the CompressorNode used at the Makerspace Leiden.
 
@@ -13,7 +13,7 @@ This software is developed with Visual Studio Code in combination with the exten
 **This CompressorNode (the hardware in combination with the software) has the following features:**
 
 - _Button On_: to manual switch on the compressor or cancel a manual switch off, waiting for the motor to stop running; 
-- _Button Off_: to manual switch off the compressor, if the motor of the compressor is still running, switch off will be posponed until de motor is switched off by the pressure switch of the compressor. Pressing this switch for > 5s (when the motor is running) the compressor is switched iff immediately;
+- _Button Off_: to manual switch off the compressor, if the motor of the compressor is still running, switch off will be posponed until de motor is switched off by the pressure switch of the compressor. Pressing this switch for > 5s (when the motor is running) the compressor is switched off immediately;
 - _Button On + Button Off_: if both buttons are pressed together for more than 5 seconds, while calibration mode is disabled, calibration mode will be disabled. Pressing both buttons together while calibration mode is enabled, calibration mode is disabled immediately. Also the duratution counters are saved in flash, every time calibration mode is enabled;
 - _but1_: also used to toggle info / calibration mode on or off. but1 is the second button of the ESP32-PoE module. Press this button, when the node is running (the boot screen is not shown anymore). When info calibration mode is active each second e.g. the IP address and calibration info is logged to MQTT and telnet etc. Also the duratution counters are saved in flash, every time this button is pressed;
 - _Automatic switch on_: switch the compressor on by means of dedicated MQTT messages

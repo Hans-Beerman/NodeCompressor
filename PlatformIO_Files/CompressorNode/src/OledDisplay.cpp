@@ -15,6 +15,9 @@
 
 #define KEEP_STATUS_LINE_TIME (5000) // in ms, default = 5 s (5000), the time certain status messages are shown on the bottom line of the display
 
+#define Temp1Label "Compr" // not more and not less than 5 chars
+#define Temp2Label "Motor" // not more and not less than 5 chars
+
 typedef enum {
   NORMALDISPLAY,        // Normal display shown when there is no error, showing current compressor state etc.
   ERRORDISPLAY
@@ -233,9 +236,9 @@ void OledDisplay::loop(bool oilLevelIsTooLow, bool ErrorOilLevelIsTooLow, float 
           u8x8.setFont(u8x8_font_amstrad_cpc_extended_f);
           if (nextTimeDisplay) {
             if (temperature1 < -100) {
-              sprintf(outputStr, "Temp1: N.A.     ");
+              sprintf(outputStr, "%s: N.A.     ", Temp1Label);
             } else {
-              sprintf(outputStr, "Temp1:%7.2f %cC", temperature1, 176);
+              sprintf(outputStr, "%s:%7.2f %cC", Temp1Label, temperature1, 176);
             }
             u8x8.drawString(0, 5, outputStr);
           } else {
@@ -274,9 +277,9 @@ void OledDisplay::loop(bool oilLevelIsTooLow, bool ErrorOilLevelIsTooLow, float 
           u8x8.setFont(u8x8_font_amstrad_cpc_extended_f);
           if (nextTimeDisplay) {
             if (temperature2 < -100) {
-              sprintf(outputStr, "Temp2: N.A.     ");
+              sprintf(outputStr, "%s: N.A.     ", Temp2Label);
             } else {
-              sprintf(outputStr, "Temp2:%7.2f %cC", temperature2, 176);
+              sprintf(outputStr, "%s:%7.2f %cC", Temp2Label, temperature2, 176);
             }
             u8x8.drawString(0, 6, outputStr);
           } else {
@@ -460,7 +463,7 @@ void OledDisplay::loop(bool oilLevelIsTooLow, bool ErrorOilLevelIsTooLow, float 
           if ((temperature1 != lastTempDisplayed1) || nextTimeDisplay) {
             lastTempDisplayed1 = temperature1;
             u8x8.setFont(u8x8_font_amstrad_cpc_extended_f);
-            sprintf(outputStr, "Temp1:%7.2f %cC", temperature1, 176);
+            sprintf(outputStr, "%s:%7.2f %cC", Temp1Label, temperature1, 176);
             u8x8.drawString(0, 10, outputStr);
           }
         } else {
@@ -472,7 +475,7 @@ void OledDisplay::loop(bool oilLevelIsTooLow, bool ErrorOilLevelIsTooLow, float 
           if ((temperature2 != lastTempDisplayed2) || nextTimeDisplay) {
             lastTempDisplayed2 = temperature2;
             u8x8.setFont(u8x8_font_amstrad_cpc_extended_f);
-            sprintf(outputStr, "Temp2:%7.2f %cC", temperature2, 176);
+            sprintf(outputStr, "%s:%7.2f %cC", Temp2Label, temperature2, 176);
             u8x8.drawString(0, 11, outputStr);
           }
         } else {

@@ -72,7 +72,7 @@ WiFiUDP wifiUDP;
 NTP ntp(wifiUDP);
 
 // for test
-#define MACHINE "compressor"
+#define MACHINE "bluecompressor"
 
 // button on and button off
 #define BUTTON_ON_PRESSED (LOW) // the input level of the GPIO port used for button on, if this button is pressed

@@ -56,7 +56,7 @@
 #define MQTT_SERVER "spacebus.makerspaceleiden.nl"
 #endif
 
-#ifndef MQTT_TOPIC_PREFIX 
+#ifndef MQTT_TOPIC_PREFIX
 #define MQTT_TOPIC_PREFIX "test"
 #endif
 

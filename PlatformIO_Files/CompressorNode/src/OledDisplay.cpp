@@ -1,6 +1,9 @@
 #include "OledDisplay.h"
 
+// For old display
 #include <U8x8lib.h> // install U8g2 library by oliver
+// For new display
+//#include <U8g2lib.h> // install U8g2 library by oliver
 
 // for I2C display
 #ifndef I2C_SDA
@@ -80,7 +83,12 @@ float runningTime = 0.0;
 float lastRunningDisplayed = 0.0;
 
 // for 1.5 inch OLED Display 128*128 pixels wit - I2C
-U8X8_SSD1327_WS_128X128_SW_I2C u8x8(I2C_SCL, I2C_SDA, U8X8_PIN_NONE);
+// Old type of display
+// U8X8_SSD1327_WS_128X128_SW_I2C u8x8(I2C_SCL, I2C_SDA, U8X8_PIN_NONE);
+// New type of display
+//U8X8_SSD1327_MIDAS_128X128_SW_I2C u8x8(I2C_SCL, I2C_SDA, U8X8_PIN_NONE);
+U8X8_SSD1327_MIDAS_128X128_HW_I2C u8x8(U8X8_PIN_NONE, I2C_SCL, I2C_SDA);
+
 
 OledDisplay::OledDisplay() {
   return;

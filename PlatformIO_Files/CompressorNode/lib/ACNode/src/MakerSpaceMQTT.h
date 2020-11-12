@@ -74,12 +74,15 @@
 
 // MQTT limits - which are partly ESP chip rather than protocol specific.
 // MQTT limits - which are partly ESP chip rather than protocol specific.
-#define MAX_HOST       128
-#define MAX_NAME       24
-#define MAX_TOPIC      64
-#define MAX_MSG        (MQTT_MAX_PACKET_SIZE - 32)
-#define MAX_TAG_LEN    10 /* 10 taken from the MFRC522 header */
-#define BEATFORMAT     "%012lu" // hard-coded - it is part of the HMAC */
-#define MAX_BEAT       16
+#define MAX_HOST              128
+#define MAX_NAME              24
+#define MAX_TOPIC             64
+#define MAX_MSG               (MQTT_MAX_PACKET_SIZE - 32)
+#define MAX_TAG_LEN           10 /* 10 taken from the MFRC522 header */
+#define BEATFORMAT            "%012lu" // hard-coded - it is part of the HMAC */
+#define MAX_BEAT              16
 
+#ifndef MAX_ITEMS_IN_PUBLISH_QUEUE 
+#define MAX_ITEMS_IN_PUBLISH_QUEUE   50
+#endif
 

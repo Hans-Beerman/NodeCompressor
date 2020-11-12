@@ -1,6 +1,6 @@
 **Source code CompressorNode Makerspace Leiden**
 
-Current version: V0.17 Concept
+Current version: V0.18 Concept
 
 This repository contains the source code for the CompressorNode used at the Makerspace Leiden.
 

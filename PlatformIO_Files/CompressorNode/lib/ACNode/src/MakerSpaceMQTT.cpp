@@ -17,6 +17,8 @@ typedef struct publish_rec {
 } publish_rec_t;
 
 publish_rec_t *publish_queue = NULL;
+publish_rec_t *last_item_in_publish_queue = NULL;
+int items_in_publish_queue = 0;
 
 
 void ACNode::send(const char * topic, const char * payload, bool _raw) {
@@ -33,7 +35,7 @@ void ACNode::send(const char * topic, const char * payload, bool _raw) {
     if (rec) {
         rec->topic = strdup(topic);
         rec->payload = strdup(payload);
-	rec->raw = _raw;
+	    rec->raw = _raw;
         rec->nxt = NULL;
     }
     
@@ -48,6 +50,7 @@ void ACNode::send(const char * topic, const char * payload, bool _raw) {
     // We append at the very end -- this preserves order -and- allows
     // us to add things to the queue while in something works on it.
     //
+/*    
     publish_rec_t ** p = &publish_queue;
     int i = 0;
     while (*p) {
@@ -55,8 +58,37 @@ void ACNode::send(const char * topic, const char * payload, bool _raw) {
 	i++;
     };
     *p = rec;
+*/
 
-//    Serial.printf("Queued at # %d\n",i);
+    publish_rec_t ** p = &publish_queue; // root of queue
+    if (!*p) {
+        // Store first item in root of queue
+        *p = rec;
+        // set pointer to last item in queue
+        p = &last_item_in_publish_queue;
+        *p = rec;
+    } else {
+        // add next item to queue
+        p = &last_item_in_publish_queue;
+        p = &(*p)->nxt;
+        *p = rec;
+        // set pointer to last item in queue
+        p = &last_item_in_publish_queue;
+        *p = rec;
+    } 
+    if (items_in_publish_queue < MAX_ITEMS_IN_PUBLISH_QUEUE) {
+        items_in_publish_queue++;
+    } else {
+        // Queue is full, remove oldest item from queue
+        rec = publish_queue;
+        publish_queue = rec->nxt;
+        free(rec->topic);
+        free(rec->payload);
+        free(rec);
+    }
+
+    Serial.printf("\n\rQueued at # %d\n\r", items_in_publish_queue);
+//    Serial.printf("Queued at # %d\n", i);
 }
 
 
@@ -275,5 +307,13 @@ _done_without_send:
     free(rec->topic);
     free(rec->payload);
     free(rec);
+    if (items_in_publish_queue > 0) {
+        items_in_publish_queue--;
+        if (items_in_publish_queue == 0) {
+            publish_queue = NULL;
+            last_item_in_publish_queue = NULL;
+        }
+    }
 }
+
 

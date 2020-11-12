@@ -387,66 +387,74 @@ void ACNode::loop() {
 #endif
 
     {	static unsigned long last = 0;
-	if (millis() - last > _report_period) {
-		last = millis();
+	    if (millis() - last > _report_period) {
+	    	last = millis();
 
-		// DynamicJsonBuffer  jsonBuffer(JSON_OBJECT_SIZE(30) + 500);
-		// JsonObject& out = jsonBuffer.createObject();
+		    // DynamicJsonBuffer  jsonBuffer(JSON_OBJECT_SIZE(30) + 500);
+		    // JsonObject& out = jsonBuffer.createObject();
 
-        DynamicJsonDocument jsonDoc(JSON_OBJECT_SIZE(30) + 500);
+            DynamicJsonDocument jsonDoc(JSON_OBJECT_SIZE(30) + 500);
 
-		jsonDoc[ "node" ] = moi;
-		jsonDoc[ "machine" ] = machine;
+            jsonDoc[ "node" ] = moi;
+            jsonDoc[ "machine" ] = machine;
 
-		jsonDoc[ "maxMqtt" ] = MAX_MSG;
+            jsonDoc[ "maxMqtt" ] = MAX_MSG;
 
-		char chipstr[30]; strncpy(chipstr,chipId().c_str(),sizeof(chipstr));
-		jsonDoc[ "id" ] = chipstr;
-		char ipstr[30]; strncpy(ipstr, String(localIP().toString()).c_str(),sizeof(ipstr));
-                jsonDoc[ "ip" ] = ipstr;
-                jsonDoc[ "net" ] = _wired ? "UTP" : "WiFi";
- 		char macstr[30]; strncpy(macstr, macAddressString().c_str(),sizeof(macstr));
-  		jsonDoc[ "mac" ] = macstr;
+            char chipstr[30]; strncpy(chipstr,chipId().c_str(),sizeof(chipstr));
+            jsonDoc[ "id" ] = chipstr;
+            char ipstr[30]; strncpy(ipstr, String(localIP().toString()).c_str(),sizeof(ipstr));
+                    jsonDoc[ "ip" ] = ipstr;
+                    jsonDoc[ "net" ] = _wired ? "UTP" : "WiFi";
+            char macstr[30]; strncpy(macstr, macAddressString().c_str(),sizeof(macstr));
+            jsonDoc[ "mac" ] = macstr;
 
-		jsonDoc[ "beat" ] = beatCounter;
+            jsonDoc[ "beat" ] = beatCounter;
 
-		if (beatCounter > 1542275849 && _start_beat == 0)
-			_start_beat  = beatCounter;
-		else 
-		if (_start_beat)
-			jsonDoc[ "alive-uptime" ] = beatCounter - _start_beat;
+            if (beatCounter > 1542275849 && _start_beat == 0) {
+                _start_beat  = beatCounter;
+             } else {
+                if (_start_beat) {
+                    jsonDoc[ "alive-uptime" ] = beatCounter - _start_beat;
+                }
+             }
 
-		jsonDoc[ "approve" ] = _approve;
-		jsonDoc[ "deny" ] = _deny;
-		jsonDoc[ "requests" ] = _reqs;
+            jsonDoc[ "approve" ] = _approve;
+            jsonDoc[ "deny" ] = _deny;
+            jsonDoc[ "requests" ] = _reqs;
 #ifdef ESP32
-		jsonDoc[ "cache_hit" ] =  cacheHit;
-		jsonDoc[ "cache_miss" ] =  cacheMiss;
+            jsonDoc[ "cache_hit" ] =  cacheHit;
+            jsonDoc[ "cache_miss" ] =  cacheMiss;
 #endif
 
-		jsonDoc[ "mqtt_reconnects" ] = _mqtt_reconnects;
+            jsonDoc[ "mqtt_reconnects" ] = _mqtt_reconnects;
 
-		jsonDoc["loop_rate"] = loopRate;
+            jsonDoc["loop_rate"] = loopRate;
 #ifdef ESP32
            	jsonDoc["coreTemp"]  = coreTemp(); 
 #endif
-		jsonDoc["heap_free"] = ESP.getFreeHeap();	
+    		jsonDoc["heap_free"] = ESP.getFreeHeap();	
 
-        JsonObject out = jsonDoc.to<JsonObject>();
 
-		std::list<ACBase *>::iterator it;
-       		for (it =_handlers.begin(); it!=_handlers.end(); ++it) 
+            String buff;
+            serializeJson(jsonDoc, buff);
+
+            JsonObject out = jsonDoc.to<JsonObject>();
+
+            std::list<ACBase *>::iterator it;
+       		for (it =_handlers.begin(); it!=_handlers.end(); ++it) {
         		(*it)->report(out);
+            }
 
-		if (_report_callback) 
-			_report_callback(out);	
+            if (_report_callback) {
+                _report_callback(out);
+            }
 
-        String buff;
-        serializeJson(jsonDoc, buff);
-        if (buff.length() > MAX_MSG) {
-            buff = buff.substring(0, MAX_MSG);
-        }
-		Log.println(buff);
+            serializeJson(jsonDoc, buff);
+            if (buff.length() > MAX_MSG) {
+                buff = buff.substring(0, MAX_MSG);
+            }
+            Log.println(buff);
+
         }
     }
     // XX to hook into a callback of the ethernet/wifi
@@ -468,15 +476,16 @@ void ACNode::loop() {
 
     cacheToSPIFFSLoop(beatCounter);
  
-    if(isConnected())
+    if(isConnected()) {
         mqttLoop();
+    }
     
     // Note that this will also run the security and other handlers; see
     // addSecurityHandler().
     //
     std::list<ACBase *>::iterator it;
  
-       for (it =_handlers.begin(); it!=_handlers.end(); ++it) {
+    for (it =_handlers.begin(); it!=_handlers.end(); ++it) {
         (*it)->loop();
     }
 }
@@ -489,7 +498,7 @@ ACBase::cmd_result_t ACNode::handle_cmd(ACRequest * req)
         
         snprintf(buff, sizeof(buff), "ack %s %s %d.%d.%d.%d", master, moi, myIp[0], myIp[1], myIp[2], myIp[3]);
         send(NULL, buff);
-	Debug.println("replied on the pick with an ack.");
+	    Debug.println("replied on the pick with an ack.");
         return ACNode::CMD_CLAIMED;
     }
     bool app = ((strcasecmp("approved",req->cmd)==0) || (strcasecmp("open",req->cmd)==0));
@@ -500,46 +509,46 @@ ACBase::cmd_result_t ACNode::handle_cmd(ACRequest * req)
     if (den) _deny++;
 
     if (app || den) {
-      char tmp[MAX_MSG], *p = tmp;
-      strncpy(tmp, req->rest, sizeof(tmp));
+        char tmp[MAX_MSG], *p = tmp;
+        strncpy(tmp, req->rest, sizeof(tmp));
 
-      SEP(action, "No action in approval command", ACNode::CMD_CLAIMED)
-      SEP(machine, "No machine-name in approval command", ACNode::CMD_CLAIMED);
-      SEP(bcstr, "No nonce/beat in approval command", ACNode::CMD_CLAIMED);
-      beat_t bc = strtoul(bcstr, NULL, 10);
+        SEP(action, "No action in approval command", ACNode::CMD_CLAIMED)
+        SEP(machine, "No machine-name in approval command", ACNode::CMD_CLAIMED);
+        SEP(bcstr, "No nonce/beat in approval command", ACNode::CMD_CLAIMED);
+        beat_t bc = strtoul(bcstr, NULL, 10);
 
-      if (beat_absdelta(beatCounter, _lastSwipe) > 60)  {
-          Log.printf("Stale energize/denied command received - ignored.\n");
-          return ACNode::CMD_CLAIMED;
-      };
+        if (beat_absdelta(beatCounter, _lastSwipe) > 60)  {
+            Log.printf("Stale energize/denied command received - ignored.\n");
+            return ACNode::CMD_CLAIMED;
+        };
 
-      if (bc != _lastSwipe) {
-          if ((device1 != NULL) && (device2 != NULL)) {
-              if ((bc - _lastSwipe) > 1) {
-                  Log.printf("Out of order energize/denied command received - ignored.\n");
-                  return ACNode::CMD_CLAIMED;
-              }
-          } else {
-              Log.printf("Out of order energize/denied command received - ignored.\n");
-              return ACNode::CMD_CLAIMED;
-          }
-      };
+        if (bc != _lastSwipe) {
+            if ((device1 != NULL) && (device2 != NULL)) {
+                if ((bc - _lastSwipe) > 1) {
+                    Log.printf("Out of order energize/denied command received - ignored.\n");
+                    return ACNode::CMD_CLAIMED;
+                }
+            } else {
+                Log.printf("Out of order energize/denied command received - ignored.\n");
+                return ACNode::CMD_CLAIMED;
+            }
+    };
 
-      setCache(_lasttag, app, (unsigned long) beatCounter);
+    setCache(_lasttag, app, (unsigned long) beatCounter);
 
-            if (app) {
-         Log.printf("Received OK to power on %s\n", machine);
-         if (_approved_callback) {
-		_approved_callback(machine);
-        	return ACNode::CMD_CLAIMED;
-         };
-     } else {
-         Log.printf("Received a DENIED to power on %s\n", machine);
-         if (_denied_callback) {
-		_denied_callback(machine);
-        	return ACNode::CMD_CLAIMED;
-         };
-     }
+        if (app) {
+            Log.printf("Received OK to power on %s\n", machine);
+            if (_approved_callback) {
+                _approved_callback(machine);
+                return ACNode::CMD_CLAIMED;
+            };
+        } else {
+            Log.printf("Received a DENIED to power on %s\n", machine);
+            if (_denied_callback) {
+                _denied_callback(machine);
+                return ACNode::CMD_CLAIMED;
+            };
+        }
     }
 #if 0
     if (!strcmp("outoforder", req->cmd)) {

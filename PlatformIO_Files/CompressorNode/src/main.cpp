@@ -110,6 +110,10 @@ OptoDebounce opto1(OPTO1); // wired to N0 - L1 of 3 phase compressor motor, to d
 // NTP update window
 #define NTP_UPDATE_WINDOW (1000) // in ms
 
+// for auto reset node at configured hour
+#define AUTO_RESET_ENABLED true // if auto reset is enabled
+#define AUTO_RESET_HOUR 1 // Reset node at 1:00 hr
+int previousHour = AUTO_RESET_HOUR;
 
 // setting PWM properties for LED's
 #define PWM_FREQ (5000)
@@ -146,6 +150,8 @@ OptoDebounce opto1(OPTO1); // wired to N0 - L1 of 3 phase compressor motor, to d
 #define MAX_WAIT_TIME_BUTTON_OFF_PRESSED      (5000)  // in ms, time button off must be pressed to switch compressor off immediately
 #define LED_DISABLE_DURATION                  (5000)  // in ms, the time LED1 will flash if button on is pressed during late hour
 #define LED_DISABLE_PERIOD                    (200)  // in ms, the time LED1 will flash on/off
+#define AUTOMATIC_EXTEND_AUTOTIMEOUT          (true)
+#define AUTO_EXTEND_PRESSURE_LIMIT            (7) // extend auto timeout if pressure is below limit while compressor is on
 
 // time window for calibration buttons
 #define CALIB_WINDOW_TIME                     (5000) // in ms
@@ -250,6 +256,8 @@ bool isManualSwitchedOffVerifyOverride = false;
 bool isManualSwitchedOff = false;
 bool isManualSwitchedOffWait = false;
 bool isManualTimeOutExtended = false;
+bool isAutomaticTimeOutExtended = false;
+bool checkPressureTimeOutExtend = false;
 
 unsigned long ledDisableTime = 0;
 unsigned long nextLedDisableTime = 0;
@@ -803,12 +811,23 @@ void buttons_optocoupler_loop() {
       // digitalWrite(LED2, 1);
       ledcWrite(PWM_LED_CHANNEL2, LED2_DIM_VALUE);
       machinestate = RUNNING;
+      if (AUTOMATIC_EXTEND_AUTOTIMEOUT) {
+        // Extend automatic timeout
+        autoPowerOff = millis();
+        isAutomaticTimeOutExtended = true;
+      }
     } 
   } else {
     if (machinestate == RUNNING) {
       // digitalWrite(LED2, 0);
       ledcWrite(PWM_LED_CHANNEL2, 0);
-      machinestate = POWERED;        
+      machinestate = POWERED;
+      if (AUTOMATIC_EXTEND_AUTOTIMEOUT) {        
+        // Extend automatic timeout
+        autoPowerOff = millis();
+        isAutomaticTimeOutExtended = true;
+        checkPressureTimeOutExtend = true;
+      }
     }
   }
 
@@ -840,6 +859,13 @@ void buttons_optocoupler_loop() {
   if (isManualTimeOutExtended) {
     isManualTimeOutExtended = false;
     Log.println("Compressor timeout extended with button");
+    theOledDisplay.showStatus(TIMEOUTEXTENDED);
+    
+  }
+
+  if (isAutomaticTimeOutExtended) {
+    isAutomaticTimeOutExtended = false;
+    Log.println("Compressor timeout extended automatically");
     theOledDisplay.showStatus(TIMEOUTEXTENDED);
   }
 
@@ -920,14 +946,42 @@ void buttons_optocoupler_loop() {
   }
 }
 
+void autoReset() {
+	if (!AUTO_RESET_ENABLED) {
+		return;
+	}
+
+  int currentHour = ntp.hours();
+  if ((previousHour != currentHour) && (currentHour == AUTO_RESET_HOUR)) {
+  	saveDurationCounters();
+  	ESP.restart();
+  } else {
+  	previousHour = currentHour;
+  }
+}
+
+
+void checkPressure() {
+  if (AUTOMATIC_EXTEND_AUTOTIMEOUT && checkPressureTimeOutExtend) {
+    if (thePressureSensor.currentPressure() < AUTO_EXTEND_PRESSURE_LIMIT) {
+      checkPressureTimeOutExtend = false;
+      autoPowerOff = millis();
+      isAutomaticTimeOutExtended = true;
+    }
+  }
+}
+
 void compressorLoop() {
  
   if ((millis() - nextNTPUpdateTime) > NTP_UPDATE_WINDOW) {
     ntp.update();
     nextNTPUpdateTime = millis();
   }
-  
 
+  autoReset();
+
+  checkPressure();
+  
   if (machinestate > SWITCHEDOFF) {
     // check if compressor must be automatically switched off
     if ((millis() - autoPowerOff) > AUTOTIMEOUT) {

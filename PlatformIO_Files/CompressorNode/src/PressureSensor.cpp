@@ -58,4 +58,7 @@ void PressureSensor::logInfoCalibration() {
     return pressureIsBelowMinimum;
   }
 
+  float PressureSensor::currentPressure() {
+    return pressure;
+  }
 

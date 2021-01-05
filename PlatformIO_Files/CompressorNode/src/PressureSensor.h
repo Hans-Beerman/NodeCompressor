@@ -22,4 +22,6 @@ public:
   bool tooHighPressure();
 
   bool lowPressure();
+
+  float currentPressure();
 };

@@ -1,12 +1,12 @@
 **Source code CompressorNode Makerspace Leiden**
 
-Current version: V0.18 Concept
+Current version: V0.19 Concept
 
 This repository contains the source code for the CompressorNode used at the Makerspace Leiden.
 
-This CompressorNode is based on the use of the Olimex ESP32\_PoE. This small processor board is plugged on a backplane, details about this backplane can be found here:
+This CompressorNode is based on the use of the Olimex ESP32\_PoE. This small processor board is plugged on a backplane, details about this backplane can be found here, in KiCad files/CompressorNode:
 
-[https://github.com/Hans-Beerman/CompressorNode](https://github.com/Hans-Beerman/CompressorNode)
+[https://github.com/Hans-Beerman/NodeCompressor](https://github.com/Hans-Beerman/NodeCompressor)
 
 This software is developed with Visual Studio Code in combination with the extension PlatformIO.
 
@@ -18,7 +18,7 @@ This software is developed with Visual Studio Code in combination with the exten
 - _but1_: also used to toggle info / calibration mode on or off. but1 is the second button of the ESP32-PoE module. Press this button, when the node is running (the boot screen is not shown anymore). When info calibration mode is active each second e.g. the IP address and calibration info is logged to MQTT and telnet etc. Also the duratution counters are saved in flash, every time this button is pressed;
 - _Automatic switch on_: switch the compressor on by means of dedicated MQTT messages
 - _Automatic switch off_: switch the compressor off by means of dedicated MQTT mesages
-- _Timeout_: the compressor will automatically switch off after a certain (in source code) configured timeout, currently after 30 minutes. Pressing Button On again (or sending MQTT command), while the compressor is switched on, will extend the timeout with 30 minutes;
+- _Timeout_: the compressor will automatically switch off after a certain (in source code) configured timeout, currently after 60 minutes. Pressing Button On again (or sending MQTT command), while the compressor is switched on, will extend the timeout with 60 minutes. The auto switch off time will also be extended, with 60 minutes, when the compressor switches the motor of the compressor on or off;
 - _Late hour disable_: after a configured time in the evening (currently 22:00 h) and before a configured time in the morning (currently 08:00 h) the compressor is disabled to prevent too much noise for our neighbors. This means the compressor will not start automatically by means of MQTT messages. Also the compressor will not start if the Button On is pressed normally;
 - _Overrule late hour disable_: the late hour disable function can be overruled by pressing the Button On continuously for more than 10 seconds;
 - _230VAC relais output:_ to switch the compressor on or off;
@@ -49,8 +49,10 @@ This library is used to collect the correct local time via NTP;
 - _U8x8lib_: U8g2 library by oliver (#include <U8x8lib.h>), current version 2.28.2, this library is used for the 128x128 pixels Oled display used.
 
 WARNING:
-In PubSubClient.h the following define must be changed from 256 to 340:
-#define MQTT_MAX_PACKET_SIZE 340
+The #define MQTT_MAX_PACKET_SIZE 254, in PubSubClient.h is overrulled in platformio.ini and set to 768:
+In platformio,ini:
+build_flags =
+  '-DMQTT_MAX_PACKET_SIZE=768'
 
 **Configuratie PlatformIO**
 
@@ -94,15 +96,38 @@ _--port=8266_
 
 _--auth=MyPassWoord_
 
-_; evaluate C/C++ Preprocessor conditional syntax_
-
-_lib\_ldf\_mode = deep+_
-
 _;upload\_port = /dev/ttyUSB0_
 
 _monitor\_speed = 115200_
 
 _board\_build.partitions = huge\_app.csv_
+
+_; add local libraries_
+_lib_deps =_
+  _PubSubClient_
+  _bblanchon/ArduinoJson_
+  _Adafruit MAX31856 library_
+  _PID_
+  _ESP32WebServer_
+  _NTP_
+  _olikraus/U8g2_
+  _milesburton/DallasTemperature_
+  _adafruit/Adafruit GFX Library_
+  _adafruit/Adafruit SSD1306_
+
+_; evaluate C/C++ Preprocessor conditional syntax_
+_lib\_ldf\_mode = deep+_
+
+_monitor\_speed = 115200_
+_board\_build.partitions = huge\_app.csv_
+
+_build\_flags =_
+  _; for debugging use next flag, otherwise make it comment_
+  _;'-DDEBUGIT'_
+  _; Default packet size is to small_
+  _'-DMQTT\_MAX\_PACKET\_SIZE=768'_
+  _; mqtt server address if not mqtt server MakerSpace_
+  _;'-DMQTT\_SERVER="10.0.0.145"'_
 
 **Configuration of the behaviour of the Node**
 

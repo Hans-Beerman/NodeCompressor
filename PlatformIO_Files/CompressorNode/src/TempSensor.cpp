@@ -24,7 +24,7 @@ int currentTempSensor = 0;
 
 TemperatureSensor::TemperatureSensor(float tempIsHighLevel, float tempIsTooHighLevel, const char *tempLabel) {
   tempSensorNr = currentTempSensor++;
-	theTempIsHighLevel = tempIsHighLevel;
+  theTempIsHighLevel = tempIsHighLevel;
 	theTempIsTooHighLevel = tempIsTooHighLevel;
   conversionTime = MAX_TEMP_CONVERSIONTIME / (1 << (12 - TEMP_RESOLUTION));
   sprintf(labelTempSensor, "%s", tempLabel);
